@@ -126,8 +126,8 @@ router.post("/new", async (req, res) => {
 // * Update Merchant ( Complete ) ( A )
 // * Done
 router.put("/edit/:id", async (req, res) => {
-  try {
-    var verificationSchema = Joi.object({
+ try {
+    /*var verificationSchema = Joi.object({
       businessName: Joi.string().max(150).required(),
       email: Joi.string().email().required(),
       businessInfo: Joi.object().keys({
@@ -162,7 +162,7 @@ router.put("/edit/:id", async (req, res) => {
     });
 
     const { error } = verificationSchema.validate(req.body);
-    if (error) return res.send(error.details[0].message);
+    if (error) return res.send(error.details[0].message);*/
 
     var merchant = await Merchant.findByIdAndUpdate(
       req.params.id,

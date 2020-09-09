@@ -48,7 +48,8 @@ const customerSchema = new mongoose.Schema({
     id:String,
     name:String,
     price:Number,
-    qty:Number
+    qty:Number,
+    slot:[String]
   }]
 });
 

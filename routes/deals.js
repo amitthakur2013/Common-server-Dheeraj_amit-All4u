@@ -91,6 +91,48 @@ router.post("/new_movie",async (req, res, next) => {
 
   });
 
+//Create a hotel deal
+
+router.post("/new_hotel",async (req, res) => {
+  //console.log(req.body.roomQty);
+  
+  req.body.isActive = true;
+  let merchant;
+  try {
+    // console.log(req.body.merchant);
+    merchant = await Merchant.findById(req.body.merchant);
+    // console.log(merchant);
+  
+    if (!merchant || merchant == null)
+      return res.status(400).send("No merchant with the given id found");
+
+    req.body.dates_available=getDatesArray_movie(req.body.valid.from,req.body.valid.to,req.body.roomQty);
+
+    req.body.createdOn=moment().format("D/M/YYYY, h:m A")
+
+    const hotel_deal=new Deal({
+      ...req.body
+    })
+
+    merchant.deals.push(hotel_deal._id);
+
+    await merchant.save();
+    await hotel_deal.save();
+
+    await RecentActivity.create({
+      message: `New Hotel Coupon created by admin under merchant ${merchant.businessName}`,
+      createdOn: new Date(),
+    });
+
+    res.json(hotel_deal);
+  }  catch (error) {
+
+    console.log(error);
+  }
+  //res.send(getDatesArray_movie("2020-09-10","2020-09-13",4));
+})
+
+
 // * Create new deal (NORMAL AND ACTIVITY AND HOTEL)
 // * Done
 router.post("/new", (req, res, next) => {
@@ -239,6 +281,26 @@ const getDatesArray = (start, end) => {
     // console.log(moment(q).format("D/M/YYYY"));
     arrTime.push({ day: moment(q).format("D/M/YYYY"), slot: [] });
   }
+  return arrTime;
+};
+
+const getDatesArray_movie = (start, end, Qty) => {
+  start=new Date(start)
+  start.setDate(start.getDate()-1)
+  let initialTime = moment(start).format();
+  let endTime = moment(end).format();
+  let arrTime = [];
+  // console.log(initialTime);
+  for (
+    let q = initialTime;
+    moment(q).isBefore(endTime); // q = moment().add(1, "day").format()
+
+  ) {
+    q = moment(q).add(1, "day").format();
+    // console.log(moment(q).format("D/M/YYYY"));
+    arrTime.push({ day: moment(q).format("YYYY-MM-DD"), qty:Qty});
+  }
+  //console.log(arrTime)
   return arrTime;
 };
 

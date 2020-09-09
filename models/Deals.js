@@ -4,7 +4,6 @@ Joi.objectId = require("joi-objectid")(Joi);
 
 const dealSchema = new mongoose.Schema({
   name: String,
-  //movieName: String,
   availability:[{
     day:String,
     slot:[{
@@ -12,35 +11,32 @@ const dealSchema = new mongoose.Schema({
       to:String,
       price:Number,
       qty:Number
-      /*seats:[{
-      seatno:String,
-      isavailable:{type:Boolean,default:true}
-            }]*/
     }]
   }],
 
   //hotel deal start
+  roomQty:Number,
   adult:Number,
   child:Number,
   maxAdult:Number,
   maxChild:Number,
-  roomQty:Number,
-  meal:{
-    mealtype:String,
-    price:Number
-  },
-  extraPrice:Number,
+  dates_available:[{
+    day:String,
+    qty:Number
+  }],
+  meal:[{
+    meal_type:String,
+    meal_price:Number
+  }],
+  maxAdultPrice:Number,
+  maxChildPrice:Number,
+  minimum_nights:Number,
+  price_per_night:Number, 
+  amenities:String,
+  inclusions:String,
+
   //hotel deal finished
 
-  /*availability:[{
-    day:String,
-    slot:[{
-      from:String,
-      to:String,
-      price:Number,
-      qty:Number
-    }]
-  }],*/
   description: String,
   img: {
     type: String,
@@ -232,21 +228,24 @@ function validatehotelDeal(deal) {
     description: Joi.string(),
     img: Joi.string().required(),
     merchant: Joi.objectId().required(),
-    price: Joi.number().required(),
+    price_per_night: Joi.number().required(),
     commision: Joi.number().required(),
     discountPercent: Joi.number(),
     prefernceOrder: Joi.number().required(),
     category: Joi.objectId().required(),
-    roomQty:Joi.number().required(),
     adult:Joi.number().required(),
     child:Joi.number().required(),
     maxAdult:Joi.number().required(),
     maxChild:Joi.number().required(),
-    meal:Joi.object({
-      mealtype:Joi.string(),
-      price:Joi.number()
-    }), 
-    extraPrice:Joi.number().required(),
+    maxAdultPrice:Joi.number().required(),
+    maxChildPrice:Joi.number().required(),
+    roomQty:Joi.number().required(),
+    meal:Joi.array().items({
+      meal_type:Joi.string(),
+      meal_price:Joi.number()
+    }),
+    amenities:Joi.string(),
+    inclusions:Joi.string(),
     valid: Joi.object({
       from: Joi.string().required(),
       to: Joi.string().required(),

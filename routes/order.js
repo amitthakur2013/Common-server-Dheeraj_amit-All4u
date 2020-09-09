@@ -9,6 +9,7 @@ const _ = require("lodash");
 const { Order } = require("../models/orders");
 const { Customer } = require("../models/customer");
 const { Merchant } = require("../models/merchant");
+const { Deal } = require("../models/Deals");
 
 // * Functions
 
@@ -205,6 +206,66 @@ router.post("/new", async (req, res) => {
     res.send("Something went wrong.");
   }
 });
+
+//Create a hotel order
+router.post("/new_hotel", async (req, res) => {
+  try{
+    var redeemCode =
+      shortid.generate().toString() +
+      "-" +
+      shortid.generate().toString() +
+      "-" +
+      randomize("Aa0", 6).toString();
+
+    let customer=await Customer.findById(req.body.userid).exec();
+    console.log(customer);
+    console.log(req.body);
+
+    if (req.body.usecredit){
+      if(req.body.discountedPrice<= customer.credit){
+        customer.credit=customer.credit-req.body.discountedPrice;
+        req.body.discountedPrice=0;
+
+      } else {
+        req.body.discountedPrice=req.body.discountedPrice-customer.credit;
+        customer.credit=0;
+
+      }
+    }
+
+
+    var newOrder = await Order.create({
+      redeemCode: redeemCode,
+      deal: req.body.deal,
+      //outlet: req.body.outlet,
+      // customer: req.user._id,
+      customer: req.body.userid,
+      status: "active",
+      purchasedOn: moment(new Date()).format('LLLL'),
+      //price: req.body.price,
+      promocode: req.body.promocodeApplied, // <-- This is an optional field
+      discountedPrice: req.body.discountedPrice
+    });
+
+    var hoteldeal=await Deal.findById(req.body.deal).exec();
+    hoteldeal.dates_available.map((dt)=>{
+      if (req.body.slot.includes(dt.day)){
+        dt.qty=dt.qty-1;
+      }
+    })
+    await hoteldeal.save();
+    customer.orders.push(newOrder._id);
+    customer.markModified("orders");
+    await customer.save();
+
+
+    res.send(newOrder);
+
+  } catch (error) {
+    console.log(error);
+    res.send("Something went wrong.");
+  }
+})
 
 // * Redeem Order
 router.post("/redeem/:order_id", async (req, res) => {
